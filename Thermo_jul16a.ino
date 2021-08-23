@@ -47,7 +47,7 @@ void setup() {
   // This delay gives the chance to wait for a Serial Monitor without blocking if none is found
   for (unsigned long const serialBeginTime = millis(); !Serial && (millis() - serialBeginTime > 20000);) {}
   if (!Serial) {
-    ledflash(2, 1000);
+    //ledflash(2, 1000);
   } else {
     Serial.println("Setting serialWasHere");
     serialWasHere = 1;
@@ -60,11 +60,11 @@ void setup() {
 
 void loop() {
   if (serialWasHere == 1 && !Serial) {
-    ledflash(1, 1000);
+    //ledflash(1, 1000);
     Serial.begin(9600);
     for (unsigned long const serialBeginTime = millis(); !Serial && (millis() - serialBeginTime > 20000);) {}
     if (!Serial) {
-      ledflash(4, 1000);
+      //ledflash(4, 1000);
     }
     Serial.println("Serial Restarted");
   } else {
@@ -73,7 +73,7 @@ void loop() {
 
   Serial.println("NINA_RESETN, LOW");
   digitalWrite(NINA_RESETN, LOW);  // activate nina
-  delay(1500);
+  //delay(1500);
   DS18B20.begin();  // start DS18B20
   Serial.print("Free memory init: ");
   Serial.println(freeMemory());
@@ -94,11 +94,14 @@ void loop() {
   */
   setDebugMessageLevel(4);
   ArduinoCloud.printDebugInfo();
-  delay(10000);
+  //delay(10000);
   Serial.println("ArduinoCloud.update 1");
   ArduinoCloud.update();
+
+  // Temperature Readings
   // Grab a count of devices on the wire
   numberOfDevices = DS18B20.getDeviceCount();
+  Serial.print("Number of DS18B20 devices: ");
   Serial.println(numberOfDevices);
   DS18B20.requestTemperatures();
   if (DS18B20.getTempC(water_address)) {
@@ -112,6 +115,7 @@ void loop() {
     Serial.println(processor_Temp);
   }
 
+  // Voltage Reading
   voltage = 4.108887 * (float)analogRead(ADC_BATTERY) / 1000.0;  // read battery voltage
   Serial.print("Battery: ");
   Serial.println(voltage);
@@ -119,7 +123,6 @@ void loop() {
   //send data to the arduino iot cloud
   digitalWrite(LED_BUILTIN, HIGH);  // set LED to high during transmission
   Serial.println("Waiting for connection to Arduino IoT Cloud");
-  Serial.println("count: ");
   while (ArduinoCloud.connected() == 0 && connectCounter < 40) {
     ArduinoCloud.update();
     Serial.print("... ");
@@ -134,7 +137,7 @@ void loop() {
     Serial.println(" dBm");
     Serial.print("Free Ram connect: ");
     Serial.println(freeMemory());
-    delay(1000);
+    //delay(1000);
     Serial.print("Connected? ");
     Serial.println(ArduinoCloud.connected());
   }
@@ -153,6 +156,7 @@ void loop() {
     Serial.println(updCounter++);
     Serial.print("Free memory upd: ");
     Serial.println(freeMemory());
+    ledflash(2, 500);
     ArduinoCloud.update();
     delay(10000);
     Serial.print("Sync: ");
@@ -166,7 +170,7 @@ void loop() {
   Serial.println();
   Serial.println("WiFi.end");
   WiFi.end();
-  delay(3000);
+  //delay(3000);
 
   // Send board to sleep mode
   Serial.println("NINA_RESETN, HIGH");
@@ -177,9 +181,9 @@ void loop() {
   ECCX08.end();  // power down ECC508
   Serial.println("LowPower.deepSleep");
   Serial.end();
-  delay(3000);  // wait 10 seconds for next round
-  LowPower.deepSleep(10000);
-  //LowPower.deepSleep(300000);
+  //delay(3000);  // wait 10 seconds for next round
+  //LowPower.deepSleep(50000);
+  LowPower.deepSleep(600000);
   ledflash(5, 1000);
   Serial.println("End of deepsleep");
 }
